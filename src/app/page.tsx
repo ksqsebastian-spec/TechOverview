@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+
 type Project = {
   name: string;
   vercelProject: string;
@@ -5,7 +9,6 @@ type Project = {
   url: string;
   purpose: string;
   stack: string;
-  status: "live" | "prototype" | "error";
   totalDeployments: number;
   productionDeployments: number;
   latestDeployment: string;
@@ -18,6 +21,15 @@ type Company = {
   color: string;
   description: string;
   projects: Project[];
+};
+
+type ProjectPhase = "wip" | "done";
+
+type UserData = {
+  [vercelProject: string]: {
+    phase: ProjectPhase;
+    notes: string;
+  };
 };
 
 const companies: Company[] = [
@@ -33,7 +45,6 @@ const companies: Company[] = [
         url: "https://gw-dienstleistung-roi.vercel.app",
         purpose: "ROI-Rechner & Marketing Flywheel Dashboard mit Kanalallokation, Best Practices Checkliste, WhatsApp Automation",
         stack: "Next.js, TypeScript",
-        status: "live",
         totalDeployments: 9,
         productionDeployments: 4,
         latestDeployment: "2026-03-25",
@@ -47,7 +58,6 @@ const companies: Company[] = [
         url: "https://gw-recruiting-admin.vercel.app",
         purpose: "Recruiting-Verwaltung: Bewerbermanagement, Stellenanzeigen-Admin",
         stack: "Next.js, TypeScript, Turbopack",
-        status: "live",
         totalDeployments: 3,
         productionDeployments: 2,
         latestDeployment: "2026-03-14",
@@ -61,7 +71,6 @@ const companies: Company[] = [
         url: "https://vob-dashboard.vercel.app",
         purpose: "Ausschreibungen-Dashboard: VOB-Tender-Monitoring, Firmen-Matching, Trend-Analyse, PDF-Export, Sortierung, Angefordert-Status",
         stack: "Next.js, TypeScript, Supabase, Turbopack",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 10,
         latestDeployment: "2026-03-18",
@@ -82,7 +91,6 @@ const companies: Company[] = [
         url: "https://seehafer-affiliate-admin-site.vercel.app",
         purpose: "Affiliate-Verwaltung: Kunde-gruppierte Ansicht, Status-Workflow (offen/erledigt/ausgezahlt), Auszahlung, Archiv, E-Mail-Konfigurator, PDF-Quittungen",
         stack: "Next.js, TypeScript, Supabase, jsPDF, Turbopack",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 10,
         latestDeployment: "2026-03-14",
@@ -96,7 +104,6 @@ const companies: Company[] = [
         url: "https://seehafer-affiliate-referrer-site.vercel.app",
         purpose: "Empfehlungs-Landingpage: Formular fuer Empfehlungsgeber, E-Mail/Gmail/PDF-Versand, Bank/PayPal-Optionen, Schritt-fuer-Schritt-Anleitung",
         stack: "Next.js, TypeScript, jsPDF, Turbopack",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 9,
         latestDeployment: "2026-03-03",
@@ -110,7 +117,6 @@ const companies: Company[] = [
         url: "https://seehafer-recruiting-referral.vercel.app",
         purpose: "Mitarbeiter-Empfehlungsprogramm: Empfehlungs-Landingpage fuer Recruiting, E-Mail/Gmail/PDF-Versand",
         stack: "Next.js, TypeScript, Turbopack",
-        status: "live",
         totalDeployments: 11,
         productionDeployments: 6,
         latestDeployment: "2026-03-03",
@@ -131,7 +137,6 @@ const companies: Company[] = [
         url: "https://review-bot-p7rw.vercel.app",
         purpose: "Google-Bewertungs-Wizard: QR-Code-basiert, 7 Firmen mit branchenspezifischen Beschreibungen, Bewertungs-Generator, QR-Export/Druck",
         stack: "Next.js, TypeScript, Turbopack",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 10,
         latestDeployment: "2026-03-07",
@@ -145,7 +150,6 @@ const companies: Company[] = [
         url: "https://review-testing.vercel.app",
         purpose: "QR-Review-Generator Prototyp: 9 Firmen, Admin-Panel, DE/EN, AI-Bewertungstexte",
         stack: "Next.js, TypeScript",
-        status: "prototype",
         totalDeployments: 5,
         productionDeployments: 5,
         latestDeployment: "2026-01-22",
@@ -159,7 +163,6 @@ const companies: Company[] = [
         url: "https://b2-b-helper.vercel.app",
         purpose: "B2B-Lead-Management: CSV/Apollo-Import, Smart Auto-Mapping, E-Mail-Generierung, Supabase-Auth, Prompt-Builder",
         stack: "Next.js, TypeScript, Supabase, Turbopack",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 10,
         latestDeployment: "2026-02-20",
@@ -173,7 +176,6 @@ const companies: Company[] = [
         url: "https://fuhrpark-management.vercel.app",
         purpose: "Flottenmanagement: Fahrzeuge, Dokumente, Wartung, Fuehrerscheinkontrolle, UVV-Kontrolle, Mitarbeiter-Verwaltung",
         stack: "Next.js, TypeScript, Supabase",
-        status: "live",
         totalDeployments: 20,
         productionDeployments: 8,
         latestDeployment: "2026-02-06",
@@ -187,7 +189,6 @@ const companies: Company[] = [
         url: "https://fuhrpark-test.vercel.app",
         purpose: "Fuhrpark-Prototyp: Vanilla JS, VIN-Decoder, Kalender, CSV-Import, Passwortschutz, DE/EN",
         stack: "HTML/JS, Supabase, Vercel Functions",
-        status: "prototype",
         totalDeployments: 20,
         productionDeployments: 10,
         latestDeployment: "2026-01-22",
@@ -201,7 +202,6 @@ const companies: Company[] = [
         url: "https://auto-test-ndge.vercel.app",
         purpose: "Baudokumenten-Automatisierung: Angebote, Rechnungen, Mahnungen, LV, Nachtraege, Aufmasse - DIN 5008, GoBD-konform",
         stack: "Python, FastAPI, Jinja2, Supabase",
-        status: "live",
         totalDeployments: 5,
         productionDeployments: 4,
         latestDeployment: "2026-02-17",
@@ -212,38 +212,34 @@ const companies: Company[] = [
   },
 ];
 
-const totalProjects = companies.reduce((s, c) => s + c.projects.length, 0);
-const totalDeployments = companies.reduce(
-  (s, c) => s + c.projects.reduce((ps, p) => ps + p.totalDeployments, 0),
-  0
-);
-const liveProjects = companies.reduce(
-  (s, c) => s + c.projects.filter((p) => p.status === "live").length,
-  0
-);
+const allProjects = companies.flatMap((c) => c.projects);
+const totalProjects = allProjects.length;
+const totalDeployments = allProjects.reduce((s, p) => s + p.totalDeployments, 0);
 
-function StatusBadge({ status }: { status: Project["status"] }) {
+function PhaseBadge({
+  phase,
+  onClick,
+}: {
+  phase: ProjectPhase;
+  onClick: () => void;
+}) {
   const styles = {
-    live: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    prototype: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-    error: "bg-red-500/15 text-red-400 border-red-500/30",
+    wip: "bg-amber-500/15 text-amber-400 border-amber-500/30 hover:bg-amber-500/25",
+    done: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25",
   };
-  const labels = { live: "Live", prototype: "Prototyp", error: "Fehler" };
+  const labels = { wip: "WIP", done: "Done" };
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}
+    <button
+      onClick={onClick}
+      className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${styles[phase]}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${
-          status === "live"
-            ? "bg-emerald-400"
-            : status === "prototype"
-            ? "bg-amber-400"
-            : "bg-red-400"
+          phase === "done" ? "bg-emerald-400" : "bg-amber-400"
         }`}
       />
-      {labels[status]}
-    </span>
+      {labels[phase]}
+    </button>
   );
 }
 
@@ -255,7 +251,76 @@ function VisibilityBadge({ visibility }: { visibility: "public" | "private" }) {
   ) : null;
 }
 
+const STORAGE_KEY = "techoverview-data";
+
+function loadData(): UserData {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveData(data: UserData) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
 export default function Dashboard() {
+  const [userData, setUserData] = useState<UserData>({});
+  const [expandedNote, setExpandedNote] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setUserData(loadData());
+    setLoaded(true);
+  }, []);
+
+  const getPhase = useCallback(
+    (id: string): ProjectPhase => userData[id]?.phase ?? "wip",
+    [userData]
+  );
+
+  const getNotes = useCallback(
+    (id: string): string => userData[id]?.notes ?? "",
+    [userData]
+  );
+
+  const togglePhase = (id: string) => {
+    setUserData((prev) => {
+      const current = prev[id]?.phase ?? "wip";
+      const next: UserData = {
+        ...prev,
+        [id]: { ...prev[id], phase: current === "wip" ? "done" : "wip", notes: prev[id]?.notes ?? "" },
+      };
+      saveData(next);
+      return next;
+    });
+  };
+
+  const updateNotes = (id: string, notes: string) => {
+    setUserData((prev) => {
+      const next: UserData = {
+        ...prev,
+        [id]: { ...prev[id], phase: prev[id]?.phase ?? "wip", notes },
+      };
+      saveData(next);
+      return next;
+    });
+  };
+
+  const wipCount = allProjects.filter((p) => getPhase(p.vercelProject) === "wip").length;
+  const doneCount = allProjects.filter((p) => getPhase(p.vercelProject) === "done").length;
+
+  if (!loaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-zinc-500">Laden...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -283,15 +348,15 @@ export default function Dashboard() {
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-sm text-zinc-500">Live</p>
-              <p className="mt-1 text-2xl font-semibold text-emerald-400">
-                {liveProjects}
+              <p className="text-sm text-zinc-500">WIP</p>
+              <p className="mt-1 text-2xl font-semibold text-amber-400">
+                {wipCount}
               </p>
             </div>
             <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-              <p className="text-sm text-zinc-500">Firmen</p>
-              <p className="mt-1 text-2xl font-semibold text-white">
-                {companies.length}
+              <p className="text-sm text-zinc-500">Done</p>
+              <p className="mt-1 text-2xl font-semibold text-emerald-400">
+                {doneCount}
               </p>
             </div>
           </div>
@@ -321,67 +386,114 @@ export default function Dashboard() {
 
               {/* Project Cards */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {company.projects.map((project) => (
-                  <a
-                    key={project.vercelProject}
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group block rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60"
-                  >
-                    {/* Project name + status */}
-                    <div className="mb-3 flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-white">
-                        {project.name}
-                      </h3>
-                      <div className="flex items-center gap-1.5">
-                        <VisibilityBadge visibility={project.visibility} />
-                        <StatusBadge status={project.status} />
+                {company.projects.map((project) => {
+                  const id = project.vercelProject;
+                  const phase = getPhase(id);
+                  const notes = getNotes(id);
+                  const isExpanded = expandedNote === id;
+
+                  return (
+                    <div
+                      key={id}
+                      className={`group rounded-xl border p-5 transition-colors ${
+                        phase === "done"
+                          ? "border-emerald-900/40 bg-zinc-900/60"
+                          : "border-zinc-800 bg-zinc-900"
+                      } hover:border-zinc-600`}
+                    >
+                      {/* Project name + phase toggle */}
+                      <div className="mb-3 flex items-start justify-between gap-2">
+                        <a
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-white hover:underline"
+                        >
+                          {project.name}
+                        </a>
+                        <div className="flex items-center gap-1.5">
+                          <VisibilityBadge visibility={project.visibility} />
+                          <PhaseBadge
+                            phase={phase}
+                            onClick={() => togglePhase(id)}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Purpose */}
+                      <p className="mb-4 text-sm leading-relaxed text-zinc-400">
+                        {project.purpose}
+                      </p>
+
+                      {/* Stack */}
+                      <div className="mb-4 flex flex-wrap gap-1.5">
+                        {project.stack.split(", ").map((tech) => (
+                          <span
+                            key={tech}
+                            className="rounded-md bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Stats row */}
+                      <div className="flex items-center gap-4 border-t border-zinc-800 pt-3 text-xs text-zinc-500">
+                        <span>{project.totalDeployments} Deployments</span>
+                        <span className="text-zinc-700">|</span>
+                        <span>{project.productionDeployments} Prod</span>
+                        <span className="ml-auto text-zinc-600">
+                          {project.latestDeployment}
+                        </span>
+                      </div>
+
+                      {/* Notes section */}
+                      <div className="mt-3 border-t border-zinc-800 pt-3">
+                        <button
+                          onClick={() =>
+                            setExpandedNote(isExpanded ? null : id)
+                          }
+                          className="flex w-full items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300"
+                        >
+                          <span className="font-medium">Notizen</span>
+                          {notes && !isExpanded && (
+                            <span className="truncate text-zinc-600 italic">
+                              {notes.slice(0, 60)}
+                              {notes.length > 60 ? "..." : ""}
+                            </span>
+                          )}
+                          <span className="ml-auto">
+                            {isExpanded ? "\u25B2" : "\u25BC"}
+                          </span>
+                        </button>
+                        {isExpanded && (
+                          <textarea
+                            value={notes}
+                            onChange={(e) => updateNotes(id, e.target.value)}
+                            placeholder="Notizen hier eingeben..."
+                            rows={3}
+                            className="mt-2 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:border-zinc-500 focus:outline-none"
+                          />
+                        )}
+                      </div>
+
+                      {/* Repo + link */}
+                      <div className="mt-3 flex items-center gap-2 text-xs">
+                        <span className="rounded bg-zinc-800 px-2 py-1 text-zinc-400">
+                          {project.repo}
+                        </span>
+                        <a
+                          href={project.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-auto text-zinc-600 transition-colors hover:text-zinc-400"
+                        >
+                          Seite oeffnen &rarr;
+                        </a>
                       </div>
                     </div>
-
-                    {/* Purpose */}
-                    <p className="mb-4 text-sm leading-relaxed text-zinc-400">
-                      {project.purpose}
-                    </p>
-
-                    {/* Stack */}
-                    <div className="mb-4 flex flex-wrap gap-1.5">
-                      {project.stack.split(", ").map((tech) => (
-                        <span
-                          key={tech}
-                          className="rounded-md bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-300"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Stats row */}
-                    <div className="flex items-center gap-4 border-t border-zinc-800 pt-3 text-xs text-zinc-500">
-                      <span title="Total Deployments">
-                        {project.totalDeployments} Deployments
-                      </span>
-                      <span className="text-zinc-700">|</span>
-                      <span title="Production Deployments">
-                        {project.productionDeployments} Prod
-                      </span>
-                      <span className="ml-auto text-zinc-600">
-                        {project.latestDeployment}
-                      </span>
-                    </div>
-
-                    {/* Links */}
-                    <div className="mt-3 flex items-center gap-2 text-xs">
-                      <span className="rounded bg-zinc-800 px-2 py-1 text-zinc-400">
-                        {project.repo}
-                      </span>
-                      <span className="ml-auto text-zinc-600 transition-colors group-hover:text-zinc-400">
-                        Seite oeffnen &rarr;
-                      </span>
-                    </div>
-                  </a>
-                ))}
+                  );
+                })}
               </div>
             </section>
           ))}
@@ -389,7 +501,8 @@ export default function Dashboard() {
 
         {/* Footer */}
         <footer className="mt-12 border-t border-zinc-800 pt-6 text-center text-xs text-zinc-600">
-          Stand: 27. Maerz 2026 &middot; Daten aus Vercel API
+          Stand: 27. Maerz 2026 &middot; Daten aus Vercel API &middot; Notizen
+          werden lokal gespeichert
         </footer>
       </div>
     </div>
