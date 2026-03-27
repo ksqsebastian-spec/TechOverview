@@ -2,6 +2,7 @@ type Project = {
   name: string;
   vercelProject: string;
   repo: string;
+  url: string;
   purpose: string;
   stack: string;
   status: "live" | "prototype" | "error";
@@ -29,6 +30,7 @@ const companies: Company[] = [
         name: "GW Dienstleistung ROI",
         vercelProject: "gw-dienstleistung-roi",
         repo: "GWDienstleistungROI",
+        url: "https://gw-dienstleistung-roi.vercel.app",
         purpose: "ROI-Rechner & Marketing Flywheel Dashboard mit Kanalallokation, Best Practices Checkliste, WhatsApp Automation",
         stack: "Next.js, TypeScript",
         status: "live",
@@ -42,6 +44,7 @@ const companies: Company[] = [
         name: "GW Recruiting Admin",
         vercelProject: "gw-recruiting-admin",
         repo: "GWRecruitingAdmin",
+        url: "https://gw-recruiting-admin.vercel.app",
         purpose: "Recruiting-Verwaltung: Bewerbermanagement, Stellenanzeigen-Admin",
         stack: "Next.js, TypeScript, Turbopack",
         status: "live",
@@ -55,6 +58,7 @@ const companies: Company[] = [
         name: "VOB Dashboard",
         vercelProject: "vob-dashboard",
         repo: "VOBDashboard",
+        url: "https://vob-dashboard.vercel.app",
         purpose: "Ausschreibungen-Dashboard: VOB-Tender-Monitoring, Firmen-Matching, Trend-Analyse, PDF-Export, Sortierung, Angefordert-Status",
         stack: "Next.js, TypeScript, Supabase, Turbopack",
         status: "live",
@@ -75,6 +79,7 @@ const companies: Company[] = [
         name: "Affiliate Admin Site",
         vercelProject: "seehafer-affiliate-admin-site",
         repo: "SeehaferAffiliateAdminSite",
+        url: "https://seehafer-affiliate-admin-site.vercel.app",
         purpose: "Affiliate-Verwaltung: Kunde-gruppierte Ansicht, Status-Workflow (offen/erledigt/ausgezahlt), Auszahlung, Archiv, E-Mail-Konfigurator, PDF-Quittungen",
         stack: "Next.js, TypeScript, Supabase, jsPDF, Turbopack",
         status: "live",
@@ -88,6 +93,7 @@ const companies: Company[] = [
         name: "Affiliate Referrer Site",
         vercelProject: "seehafer-affiliate-referrer-site",
         repo: "SeehaferAffiliateReferrerSite",
+        url: "https://seehafer-affiliate-referrer-site.vercel.app",
         purpose: "Empfehlungs-Landingpage: Formular fuer Empfehlungsgeber, E-Mail/Gmail/PDF-Versand, Bank/PayPal-Optionen, Schritt-fuer-Schritt-Anleitung",
         stack: "Next.js, TypeScript, jsPDF, Turbopack",
         status: "live",
@@ -101,6 +107,7 @@ const companies: Company[] = [
         name: "Recruiting Referral",
         vercelProject: "seehafer-recruiting-referral",
         repo: "SeehaferRecruitingReferral",
+        url: "https://seehafer-recruiting-referral.vercel.app",
         purpose: "Mitarbeiter-Empfehlungsprogramm: Empfehlungs-Landingpage fuer Recruiting, E-Mail/Gmail/PDF-Versand",
         stack: "Next.js, TypeScript, Turbopack",
         status: "live",
@@ -121,6 +128,7 @@ const companies: Company[] = [
         name: "Wertungshelfer (ReviewBot)",
         vercelProject: "review-bot-p7rw",
         repo: "ReviewBot",
+        url: "https://review-bot-p7rw.vercel.app",
         purpose: "Google-Bewertungs-Wizard: QR-Code-basiert, 7 Firmen mit branchenspezifischen Beschreibungen, Bewertungs-Generator, QR-Export/Druck",
         stack: "Next.js, TypeScript, Turbopack",
         status: "live",
@@ -134,6 +142,7 @@ const companies: Company[] = [
         name: "Review Testing",
         vercelProject: "review-testing",
         repo: "Review-Testing",
+        url: "https://review-testing.vercel.app",
         purpose: "QR-Review-Generator Prototyp: 9 Firmen, Admin-Panel, DE/EN, AI-Bewertungstexte",
         stack: "Next.js, TypeScript",
         status: "prototype",
@@ -147,6 +156,7 @@ const companies: Company[] = [
         name: "B2B Helper",
         vercelProject: "b2-b-helper",
         repo: "B2BHelper",
+        url: "https://b2-b-helper.vercel.app",
         purpose: "B2B-Lead-Management: CSV/Apollo-Import, Smart Auto-Mapping, E-Mail-Generierung, Supabase-Auth, Prompt-Builder",
         stack: "Next.js, TypeScript, Supabase, Turbopack",
         status: "live",
@@ -160,6 +170,7 @@ const companies: Company[] = [
         name: "Fuhrpark Management",
         vercelProject: "fuhrpark-management",
         repo: "FuhrparkManagement",
+        url: "https://fuhrpark-management.vercel.app",
         purpose: "Flottenmanagement: Fahrzeuge, Dokumente, Wartung, Fuehrerscheinkontrolle, UVV-Kontrolle, Mitarbeiter-Verwaltung",
         stack: "Next.js, TypeScript, Supabase",
         status: "live",
@@ -173,6 +184,7 @@ const companies: Company[] = [
         name: "Fuhrpark Test",
         vercelProject: "fuhrpark-test",
         repo: "FuhrparkTest",
+        url: "https://fuhrpark-test.vercel.app",
         purpose: "Fuhrpark-Prototyp: Vanilla JS, VIN-Decoder, Kalender, CSV-Import, Passwortschutz, DE/EN",
         stack: "HTML/JS, Supabase, Vercel Functions",
         status: "prototype",
@@ -186,6 +198,7 @@ const companies: Company[] = [
         name: "BauDok (AutoTest)",
         vercelProject: "auto-test-ndge",
         repo: "AutoTest",
+        url: "https://auto-test-ndge.vercel.app",
         purpose: "Baudokumenten-Automatisierung: Angebote, Rechnungen, Mahnungen, LV, Nachtraege, Aufmasse - DIN 5008, GoBD-konform",
         stack: "Python, FastAPI, Jinja2, Supabase",
         status: "live",
@@ -309,9 +322,12 @@ export default function Dashboard() {
               {/* Project Cards */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {company.projects.map((project) => (
-                  <div
+                  <a
                     key={project.vercelProject}
-                    className="group rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition-colors hover:border-zinc-700"
+                    href={project.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block rounded-xl border border-zinc-800 bg-zinc-900 p-5 transition-colors hover:border-zinc-600 hover:bg-zinc-800/60"
                   >
                     {/* Project name + status */}
                     <div className="mb-3 flex items-start justify-between gap-2">
@@ -356,12 +372,15 @@ export default function Dashboard() {
                     </div>
 
                     {/* Links */}
-                    <div className="mt-3 flex gap-2 text-xs">
+                    <div className="mt-3 flex items-center gap-2 text-xs">
                       <span className="rounded bg-zinc-800 px-2 py-1 text-zinc-400">
                         {project.repo}
                       </span>
+                      <span className="ml-auto text-zinc-600 transition-colors group-hover:text-zinc-400">
+                        Seite oeffnen &rarr;
+                      </span>
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </section>
